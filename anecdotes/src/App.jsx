@@ -1,16 +1,22 @@
 import { useState } from 'react'
 
-const Votes = (props) => {
-  console.log(props.votes)
-
+const Anecdote = (props) => {
   return (
     <div>
-      has {props.votes[props.current]} votes
+      <p>{props.anecdote}</p>
+      <p>has {props.votes} votes</p>
     </div>
-
   )
 }
 
+const MostVotes = (props) => {
+  return (
+    <div>
+      <p>{props.anecdotes[props.mostVoted]}</p>
+      <p>has {props.votes[props.mostVoted]} votes</p>
+    </div>
+  )
+}
 
 const App = () => {
   const anecdotes = [
@@ -25,8 +31,9 @@ const App = () => {
   ]
    
   const [selected, setSelected] = useState(0)
-  const [votes, setVotes] = useState([0, 0, 0, 0, 0 , 0, 0, 0])
-  const [current, setCurrent] = useState(0)
+  const [mostVoted, setMostVotes] = useState(0)
+  // creates an array filled with 0's with the lengt of the anecdotes array
+  const [votes, setVotes] = useState(Array(anecdotes.length).fill(0))
 
   const getRandomInt = (max) => {
     return Math.floor(Math.random() * max)
@@ -34,22 +41,36 @@ const App = () => {
 
   const handleClick = () => {
     const randomInt = getRandomInt(anecdotes.length);
-    setCurrent(randomInt)
-    setSelected(randomInt)
+    if(selected === randomInt) {
+      handleClick();
+    } else {
+      setSelected(randomInt)
+    }
   }
 
   const handleVote = () => {
-    let temp = votes;
-    temp[current] = temp[current] + 1;
+    
+    const temp = votes.map((numberOfVotes, index) => {
+      if(index === selected) {
+        return numberOfVotes + 1;
+      } else {
+        return numberOfVotes;
+      }
+    })
     setVotes(temp)
+
+    const mostVotes = Math.max(...temp);
+    setMostVotes(temp.indexOf(mostVotes))
   }
 
   return (
     <div>
+      <h1>Anecdote of the day</h1>
+      <Anecdote anecdote={anecdotes[selected]} votes={votes[selected]}/>
       <button onClick={handleClick}>next anecdote</button>
       <button onClick={handleVote}>vote</button>
-      <p>{anecdotes[selected]}</p>
-      <Votes votes={votes} current={current}/>
+      <h1>Anecdote with most votes</h1>
+      <MostVotes votes={votes} mostVoted={mostVoted} anecdotes={anecdotes}/>
     </div>
   )
 }
